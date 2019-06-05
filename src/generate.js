@@ -1,6 +1,9 @@
-import chroma from 'chroma-js'
-import * as Curves from './curves.js'
-import bezier from 'bezier-easing'
+const bezier = require('bezier-easing')
+const chroma = require('chroma-js')
+
+const Curves = require('./curves')
+
+module.exports = generate
 
 function distribute(value, rangeA, rangeB) {
 
@@ -20,7 +23,7 @@ function distribute(value, rangeA, rangeB) {
   return result;
 }
 
-export default function({specs}) {
+function generate({specs}) {
 
   function generateNumberOfSteps(curve, steps) {
     var array = []
