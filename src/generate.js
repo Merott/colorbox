@@ -28,7 +28,7 @@ function generate({specs}) {
   function generateNumberOfSteps(curve, steps) {
     var array = []
     for (var step in Array.from(Array(steps).keys())) {
-      const value = curve(step/ (steps - 1))
+      const value = curve(step / (steps - 1))
       array.push(value)
 
     }
@@ -43,21 +43,21 @@ function generate({specs}) {
   var sat_array_adjusted = []
   var hue_array_adjusted = []
 
-  for (var index in lum_array){
+  for (var index in lum_array) {
     const step = lum_array[index]
-    lum_array_adjusted.push(distribute(step, [0, 1], [specs.lum_end * .01, specs.lum_start *.01], true))
+    lum_array_adjusted.push(distribute(step, [0, 1], [specs.lum_end * .01, specs.lum_start * .01], true))
   }
 
 
-  for (var index in sat_array ){
+  for (var index in sat_array) {
     const step = sat_array[index]
-    var sat_step = distribute(step, [0, 1], [specs.sat_start * .01, specs.sat_end *.01], true)
+    var sat_step = distribute(step, [0, 1], [specs.sat_start * .01, specs.sat_end * .01], true)
 
-    sat_step = sat_step * (specs.sat_rate *.01)
+    sat_step = sat_step * (specs.sat_rate * .01)
     sat_array_adjusted.push(sat_step)
   }
 
-  for (var index in hue_array){
+  for (var index in hue_array) {
     const step = hue_array[index]
     hue_array_adjusted.push(distribute(step, [0,1], [specs.hue_start, specs.hue_end]))
   }
@@ -76,36 +76,35 @@ function generate({specs}) {
     var step = lum_array[index]
 
     var params = {
-      hue:hue_array[index],
-      saturation:sat_array[index],
+      hue: hue_array[index],
+      saturation: sat_array[index],
       luminosity:lum_array[index],
     }
 
-    if (params.saturation >  1) {params.saturation = 1}
+    if (params.saturation > 1) { params.saturation = 1 }
 
-    var hex = chroma(chroma.hsv([params.hue, params.saturation, params.luminosity]))
-    var hexRGB = chroma(chroma.hsv([params.hue, params.saturation, params.luminosity])).rgb()
+    var color = chroma.hsl(params.hue, params.saturation, params.luminosity)
 
-    const contrastWhite = chroma.contrast(hex, "white").toFixed(2)
-    const contrastBlack = chroma.contrast(hex, "black").toFixed(2)
+    const contrastWhite = chroma.contrast(color, "white").toFixed(2)
+    const contrastBlack = chroma.contrast(color, "black").toFixed(2)
 
     var displayColor = ""
     if (contrastWhite >= 4.5) { displayColor = "white" } else { displayColor = "black" }
 
     var colorObj = {
-      hex: chroma(hex).hex(),
-      hue: chroma(hex).hsv()[0],
-      sat: chroma(hex).hsv()[1],
-      lum: chroma(hex).hsv()[2],
-      hsv: chroma(hex).hsv(),
-      hsl: chroma(hex).hsl(),
-      rgb: chroma(hex).rgb(),
+      hex: color.hex(),
+      hsv: color.hsv(),
+      hsl: color.hsl(),
+      rgb: color.rgb(),
+      hue: color.hsl()[0],
+      sat: color.hsl()[1],
+      lum: color.hsl()[2],
       hueRange: [specs.hue_start, specs.hue_end],
-      steps:specs.steps,
-      label:specs.modifier * index,
-      contrastBlack:contrastBlack,
-      contrastWhite:contrastWhite,
-      displayColor:displayColor,
+      steps: specs.steps,
+      label: specs.modifier * index,
+      contrastBlack: contrastBlack,
+      contrastWhite: contrastWhite,
+      displayColor: displayColor,
     }
     colorMap.push(colorObj)
   }
