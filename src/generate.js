@@ -1,9 +1,11 @@
-const bezier = require('bezier-easing')
 const chroma = require('chroma-js')
 
 const Curves = require('./curves')
 
-module.exports = generate
+module.exports = {
+  easingCurves: Object.keys(Curves),
+  generatePalette: generate
+}
 
 function distribute(value, rangeA, rangeB) {
 
