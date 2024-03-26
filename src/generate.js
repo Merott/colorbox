@@ -1,11 +1,12 @@
-const chroma = require('chroma-js')
+import { colord, extend } from 'colord'
+import a11yPlugin from "colord/plugins/a11y"
 
-const Curves = require('./curves')
+extend([a11yPlugin])
 
-module.exports = {
-  easingCurves: Object.keys(Curves),
-  generatePalette: generate
-}
+import Curves from './curves'
+
+export const easingCurves = Object.keys(Curves)
+export const generatePalette = generate
 
 function distribute(value, rangeA, rangeB) {
 
@@ -47,13 +48,13 @@ function generate({specs}) {
 
   for (var index in lum_array) {
     const step = lum_array[index]
-    lum_array_adjusted.push(distribute(step, [0, 1], [specs.lum_end * .01, specs.lum_start * .01], true))
+    lum_array_adjusted.push(distribute(step, [0, 1], [specs.lum_end, specs.lum_start], true))
   }
 
 
   for (var index in sat_array) {
     const step = sat_array[index]
-    var sat_step = distribute(step, [0, 1], [specs.sat_start * .01, specs.sat_end * .01], true)
+    var sat_step = distribute(step, [0, 1], [specs.sat_start, specs.sat_end], true)
 
     sat_step = sat_step * (specs.sat_rate * .01)
     sat_array_adjusted.push(sat_step)
@@ -74,33 +75,31 @@ function generate({specs}) {
   var colorMap = []
 
   for (var index in lum_array) {
+    var [hue, saturation, luminosity] = [
+      hue_array[index],
+      sat_array[index],
+      lum_array[index],
+    ]
 
-    var step = lum_array[index]
+    if (saturation > 100) { saturation = 100 }
 
-    var params = {
-      hue: hue_array[index],
-      saturation: sat_array[index],
-      luminosity:lum_array[index],
-    }
+    const color = colord({ h: hue, s: saturation, l: luminosity })
+    const hsl = color.toHsl()
 
-    if (params.saturation > 1) { params.saturation = 1 }
-
-    var color = chroma.hsl(params.hue, params.saturation, params.luminosity)
-
-    const contrastWhite = chroma.contrast(color, "white").toFixed(2)
-    const contrastBlack = chroma.contrast(color, "black").toFixed(2)
+    const contrastWhite = color.contrast("white")
+    const contrastBlack = color.contrast("black")
 
     var displayColor = ""
-    if (contrastWhite >= 4.5) { displayColor = "white" } else { displayColor = "black" }
+    if (contrastWhite < 4.5) { displayColor = "white" } else { displayColor = "black" }
 
     var colorObj = {
-      hex: color.hex(),
-      hsv: color.hsv(),
-      hsl: color.hsl(),
-      rgb: color.rgb(),
-      hue: color.hsl()[0],
-      sat: color.hsl()[1],
-      lum: color.hsl()[2],
+      hsl,
+      hex: color.toHex(),
+      hsv: color.toHsv(),
+      rgb: color.toRgb(),
+      hue: hsl.h,
+      sat: hsl.s,
+      lum: hsl.l,
       hueRange: [specs.hue_start, specs.hue_end],
       steps: specs.steps,
       label: specs.modifier * index,
