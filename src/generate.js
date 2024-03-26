@@ -79,7 +79,7 @@ function generate({specs}) {
       hue_array[index],
       sat_array[index],
       lum_array[index],
-    ]
+    ].map(Math.round)
 
     if (saturation > 100) { saturation = 100 }
 
